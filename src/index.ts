@@ -18,7 +18,7 @@ class WebSocket {
     off(event: "message", cb: (data: string)=> void) {
         this.emitter.off(event, cb)
     }
-    emit(event: "emit:room" | "emit:socket" | "room:join", id: string, data: string) {
+    emit(event: "emit:room" | "emit:socket" | "room:join", id: string, data: string | null) {
         this.emitter.emit(event, id, data)
     }
 }
@@ -32,7 +32,7 @@ export default function Create (host: string): Promise<WebSocket>{
                 const req = ExchangeReq.deserializeBinary((data as any).binaryData)
                 emitter.emit("message", Buffer.from(req.message).toString())
             })
-            emitter.on("room:join", (room, data) => {
+            emitter.on("room:join", (room) => {
                 const req = new ExchangeReq()
                 req.event = "room:join"
                 req.to = room
@@ -61,7 +61,7 @@ export default function Create (host: string): Promise<WebSocket>{
 
 async function main() {
     const conn = await Create("ws://127.0.0.1:8000/comms")
-    conn.emit("room:join", "test", "")
+    conn.emit("room:join", "test", null)
     setInterval(()=> {
         conn.emit("emit:room", "test", "ok")
     }, 5000)
