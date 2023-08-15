@@ -315,13 +315,15 @@
      }
  }
  export class ExchangeReq extends pb_1.Message {
-     #one_of_decls: number[][] = [];
-     constructor(data?: any[] | {
+     #one_of_decls: number[][] = [[4]];
+     constructor(data?: any[] | ({
          from?: string;
          event?: string;
          to?: string;
          message?: Uint8Array;
-     }) {
+     } & (({
+         reply?: string;
+     })))) {
          super();
          pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
          if (!Array.isArray(data) && typeof data == "object") {
@@ -333,6 +335,9 @@
              }
              if ("to" in data && data.to != undefined) {
                  this.to = data.to;
+             }
+             if ("reply" in data && data.reply != undefined) {
+                 this.reply = data.reply;
              }
              if ("message" in data && data.message != undefined) {
                  this.message = data.message;
@@ -357,16 +362,35 @@
      set to(value: string) {
          pb_1.Message.setField(this, 3, value);
      }
+     get reply() {
+         return pb_1.Message.getFieldWithDefault(this, 4, "") as string;
+     }
+     set reply(value: string) {
+         pb_1.Message.setOneofField(this, 4, this.#one_of_decls[0], value);
+     }
+     get has_reply() {
+         return pb_1.Message.getField(this, 4) != null;
+     }
      get message() {
-         return pb_1.Message.getFieldWithDefault(this, 4, new Uint8Array(0)) as Uint8Array;
+         return pb_1.Message.getFieldWithDefault(this, 5, new Uint8Array(0)) as Uint8Array;
      }
      set message(value: Uint8Array) {
-         pb_1.Message.setField(this, 4, value);
+         pb_1.Message.setField(this, 5, value);
+     }
+     get _reply() {
+         const cases: {
+             [index: number]: "none" | "reply";
+         } = {
+             0: "none",
+             4: "reply"
+         };
+         return cases[pb_1.Message.computeOneofCase(this, [4])];
      }
      static fromObject(data: {
          from?: string;
          event?: string;
          to?: string;
+         reply?: string;
          message?: Uint8Array;
      }): ExchangeReq {
          const message = new ExchangeReq({});
@@ -379,6 +403,9 @@
          if (data.to != null) {
              message.to = data.to;
          }
+         if (data.reply != null) {
+             message.reply = data.reply;
+         }
          if (data.message != null) {
              message.message = data.message;
          }
@@ -389,6 +416,7 @@
              from?: string;
              event?: string;
              to?: string;
+             reply?: string;
              message?: Uint8Array;
          } = {};
          if (this.from != null) {
@@ -399,6 +427,9 @@
          }
          if (this.to != null) {
              data.to = this.to;
+         }
+         if (this.reply != null) {
+             data.reply = this.reply;
          }
          if (this.message != null) {
              data.message = this.message;
@@ -415,8 +446,10 @@
              writer.writeString(2, this.event);
          if (this.to.length)
              writer.writeString(3, this.to);
+         if (this.has_reply)
+             writer.writeString(4, this.reply);
          if (this.message.length)
-             writer.writeBytes(4, this.message);
+             writer.writeBytes(5, this.message);
          if (!w)
              return writer.getResultBuffer();
      }
@@ -436,6 +469,9 @@
                      message.to = reader.readString();
                      break;
                  case 4:
+                     message.reply = reader.readString();
+                     break;
+                 case 5:
                      message.message = reader.readBytes();
                      break;
                  default: reader.skipField();
