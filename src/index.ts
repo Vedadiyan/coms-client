@@ -24,11 +24,7 @@ class WebSocket {
         this.emitter.emit(event, id, reply, data)
     }
     once(event: string, cb: (data: string) => void) {
-        const newCb = (data: string) => {
-            cb(data)
-            this.emitter.off(event, newCb)
-        }
-        this.emitter.on(event, newCb)
+        this.emitter.once(event, cb)
     }
     request(event: "emit:group" | "emit:socket" | "group:join" | "group:leave", id: string, data: string | null): Promise<string> {
         return new Promise<string>(res => {
