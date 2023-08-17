@@ -47,9 +47,9 @@ export default function Create(host: string): Promise<WebSocket> {
                 emitter.emit("message", Buffer.from(req.message).toString())
                 emitter.emit(req.reply, Buffer.from(req.message).toString())
             })
-            emitter.on("group:join", (group, reply) => {
+            emitter.on("join:group", (group, reply) => {
                 const req = new ExchangeReq()
-                req.event = "group:join"
+                req.event = "join:group"
                 req.to = group
                 req.reply = reply
                 conn.sendBytes(Buffer.from(req.serializeBinary()))
