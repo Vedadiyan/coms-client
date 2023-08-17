@@ -20,13 +20,13 @@ class WebSocket {
     off(event: "message", cb: (data: string) => void) {
         this.emitter.off(event, cb)
     }
-    emit(event: "emit:group" | "emit:socket" | "group:join" | "group:leave", id: string, reply: string | null, data: string | null) {
+    emit(event: "emit:group" | "emit:socket" | "join:group" | "leave:group", id: string, reply: string | null, data: string | null) {
         this.emitter.emit(event, id, reply, data)
     }
     once(event: string, cb: (data: string) => void) {
         this.emitter.once(event, cb)
     }
-    request(event: "emit:group" | "emit:socket" | "group:join" | "group:leave", id: string, data: string | null): Promise<string> {
+    request(event: "emit:group" | "emit:socket" | "join:group" | "leave:group", id: string, data: string | null): Promise<string> {
         return new Promise<string>(res => {
             const inbox = ""
             this.once(inbox, (data) => { 
@@ -78,11 +78,14 @@ export default function Create(host: string): Promise<WebSocket> {
 
 
 async function main() {
-    const conn = await Create("ws://127.0.0.1:8000/comms")
-    const response = await conn.request("group:join", "test", null)
+    const conn = await Create("ws://127.0.0.1:7000/comms")
+    const response = await conn.request("join:group", "test", null)
     console.log(response)
     setInterval(() => {
-        conn.emit("emit:group", "test", null, "ok")
+        (async()=> {
+            const response = await conn.request("emit:group", "test", "ok")
+            console.log(response)
+        })()
     }, 5000)
 }
 
