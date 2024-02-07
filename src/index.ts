@@ -39,9 +39,20 @@ class WebSocket {
 
 export default function Create(host: string): Promise<WebSocket> {
     return new Promise<WebSocket>(res => {
+        console.log("connecting...")
         const emitter = new EventEmitter()
         const sock = new ws.client()
+        sock.on('connectFailed', ()=> {
+            setTimeout(() => {
+                sock.connect(host)
+            }, 500);
+        })
         sock.on("connect", conn => {
+            conn.on('close', ()=> {
+                setTimeout(() => {
+                    sock.connect(host)
+                }, 500)
+            })
             conn.on("message", data => {
                 const req = ExchangeReq.deserializeBinary((data as any).binaryData)
                 if(req.event === "emit:group") {
@@ -89,9 +100,9 @@ async function main() {
     setInterval(() => {
         (async()=> {
             const response = await conn.request("emit:group", "test", "ok")
-            //console.log(response)
+            console.log(response)
         })()
-    }, 5000)
+    }, 2000)
 }
 
 main()
