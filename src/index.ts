@@ -44,7 +44,9 @@ export default function Create(host: string): Promise<WebSocket> {
         sock.on("connect", conn => {
             conn.on("message", data => {
                 const req = ExchangeReq.deserializeBinary((data as any).binaryData)
-                emitter.emit("message", Buffer.from(req.message).toString())
+                if(req.event === "emit:group") {
+                    emitter.emit("message", Buffer.from(req.message).toString())
+                }
                 emitter.emit(req.reply, Buffer.from(req.message).toString())
             })
             emitter.on("join:group", (group, reply) => {
@@ -78,13 +80,16 @@ export default function Create(host: string): Promise<WebSocket> {
 
 
 async function main() {
-    const conn = await Create("ws://127.0.0.1:7000/comms")
+    const conn = await Create("ws://127.0.0.1:3000/comms")
     const response = await conn.request("join:group", "test", null)
     console.log(response)
+    conn.on('message', (data: string)=> {
+        console.log(data)
+    })
     setInterval(() => {
         (async()=> {
             const response = await conn.request("emit:group", "test", "ok")
-            console.log(response)
+            //console.log(response)
         })()
     }, 5000)
 }
